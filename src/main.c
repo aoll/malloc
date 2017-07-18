@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/18 09:37:52 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/18 09:52:05 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,7 @@ void	ft_free(void *ptr)
 	}
 	if (b && b->data == ptr)
 	{
+		printf("%s\n", "found");
 		ft_free_block(b);
 	}
 
@@ -222,11 +223,11 @@ void	*ft_malloc(size_t size)
 		b = ft_find_block(base, s);
 		if (b)
 		{
+			b->is_free = 0;
 			if ((b->size - s) >= (sizeof(t_block) + sizeof(char *)))
 			{
 				ft_split_block(b, size);
 			}
-			b->is_free = 0;
 			return (b->data);
 		}
 		else
@@ -252,6 +253,7 @@ int		main(void)
 	{
 		s = ft_malloc(1024);
 		s[0] = 42;
+		// s++;
 		ft_free(s);
 		i++;
 	}
