@@ -6,9 +6,12 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/17 18:06:29 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/18 09:37:52 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
 ** INCLUDE
@@ -44,6 +47,14 @@ struct s_block
 	char		data[1];
 };
 
+typedef struct s_zone t_zone;
+
+struct s_zone
+{
+	t_block *tiny;
+	t_block *small;
+	t_block *large;
+};
 /*
 ** GLOBAL
 */
@@ -75,6 +86,61 @@ size_t	ft_align(size_t target)
 	return (new_size);
 }
 
+/*
+** Fusion the block and the next if the next is free
+*/
+
+void	ft_fusion_block(t_block *b)
+{
+	if (b->next && b->is_free)
+	{
+		b->size += sizeof(t_block) + b->next->size;
+		b->next = b->next->next;
+		if (b->next)
+		{
+			b->next->prev = b;
+		}
+	}
+	return;
+}
+
+/*
+** Free a block, set the block->is_free to 1 and fusion, if possible, the next
+** and the prev block
+*/
+
+void	ft_free_block(t_block *b)
+{
+	ft_fusion_block(b);
+	b->is_free = 1;
+	if (b->prev && b->prev->is_free)
+	{
+		ft_fusion_block(b->prev);
+	}
+	return;
+}
+
+/*
+** Free the pointeur
+*/
+
+void	ft_free(void *ptr)
+{
+	//check if correct ptr and from where is wiche zone
+	t_block *b;
+
+	b = base;
+	while (b && b->data != ptr)
+	{
+		b = b->next;
+	}
+	if (b && b->data == ptr)
+	{
+		ft_free_block(b);
+	}
+
+	return;
+}
 /*
 ** Find a free block with a size equal or bigger than the parameter size
 ** else return null
@@ -178,15 +244,16 @@ void	*ft_malloc(size_t size)
 
 int		main(void)
 {
+	int i;
 	char *s;
-	int i = 0;
 
+	i = 0;
 	while (i < 1024)
 	{
 		s = ft_malloc(1024);
 		s[0] = 42;
+		ft_free(s);
 		i++;
 	}
-
 	return (0);
 }
