@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/18 09:52:05 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/18 17:52:17 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,6 +242,9 @@ void	*ft_malloc(size_t size)
 	return (NULL);
 }
 
+/*
+** si tu cherches une meuf chaude : 0637708000
+*/
 
 int		main(void)
 {
