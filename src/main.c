@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/18 17:52:17 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/19 14:39:27 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,33 +121,47 @@ void	ft_free_block(t_block *b)
 }
 
 /*
+** Find a block with the adresse of the poiteur
+*/
+
+t_block	*ft_find_block(void *src, void *ptr)
+{
+	t_block *b;
+
+	b = src;
+	while (b && b->data != ptr)
+	{
+		b = b->next;
+	}
+	return (b);
+}
+
+/*
 ** Free the pointeur
 */
 
 void	ft_free(void *ptr)
 {
-	//check if correct ptr and from where is wiche zone
 	t_block *b;
+	void *zone;
 
-	b = base;
-	while (b && b->data != ptr)
-	{
-		b = b->next;
-	}
+	//TODO check if correct ptr and from where is wiche zone
+	zone = base;
+	b = ft_find_block(zone, ptr);
 	if (b && b->data == ptr)
 	{
 		printf("%s\n", "found");
 		ft_free_block(b);
 	}
-
 	return;
 }
+
 /*
 ** Find a free block with a size equal or bigger than the parameter size
 ** else return null
 */
 
-t_block	*ft_find_block(t_block *first, size_t size)
+t_block	*ft_find_free_block(t_block *first, size_t size)
 {
 	t_block *b;
 
@@ -220,7 +234,7 @@ void	*ft_malloc(size_t size)
 	if (base)
 	{
 		s = ft_align(size);
-		b = ft_find_block(base, s);
+		b = ft_find_free_block(base, s);
 		if (b)
 		{
 			b->is_free = 0;
@@ -240,6 +254,21 @@ void	*ft_malloc(size_t size)
 		return (ft_init_zone(size));
 	}
 	return (NULL);
+}
+
+/*
+** Realoc function copy the ptr give in paramameter, in a new block
+*/
+
+void	*ft_realloc(void *ptr, size_t s)
+{
+	t_block *src;
+	t_block *dest;
+	void	*zone;
+
+	zone = base;
+	src = ft_find_block(zone, ptr);
+	return;
 }
 
 /*
