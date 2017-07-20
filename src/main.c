@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/20 14:55:00 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/20 18:52:31 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 /*
 ** DEFINE
@@ -175,7 +176,7 @@ void	ft_free(void *ptr)
 	t_block *b;
 	void *zone;
 
-	//TODO check if correct ptr and from where is wiche zone
+	//TODO ?? check if correct ptr and from where is wiche zone
 	zone = ft_find_zone_block(ptr);
 	b = ft_find_block(zone, ptr);
 	if (b && b->data == ptr)
@@ -391,7 +392,6 @@ void	*ft_realloc(void *ptr, size_t s)
 		ft_free(ptr);
 		return (NULL);
 	}
-	// zone = ft_find_zone(s);
 	zone = ft_find_zone_block(ptr);
 	src = ft_find_block(zone, ptr);
 	if (!src)
@@ -407,7 +407,80 @@ void	*ft_realloc(void *ptr, size_t s)
 	return (dest->data);
 }
 
+/*
+** Print a pointeur adresse with hex'format
+*/
 
+void	ft_print_adress(long double adr)
+{
+	long int	simple;
+	long double	d;
+
+	simple = adr / 16;
+	d = adr / 16 - simple;
+	if (simple > 0)
+	{
+		ft_print_adress(simple);
+	}
+	simple = d * 16;
+	if (simple > 9)
+	{
+		simple = 65 + simple - 10;
+	}
+	else
+	{
+		simple += '0';
+	}
+	write(1, &simple, 1);
+	return ;
+}
+
+void	ft_putstr(char *s)
+{
+	while (*s)
+	{
+		write(1, &s, 1);
+		s++;
+	}
+	return;
+}
+
+void	ft_print_zone(t_block *b, char *name_zone)
+{
+	ft_putstr(name_zone);
+	ft_print_adress(b);
+	ft_putstr("\n");
+	while (b && b->next)
+	{
+		if (!b->is_free)
+		{
+			ft_print_adress(b->data);
+			ft_putstr(" - ");
+			ft_print_adress(b->data = b->size);
+			if (b->next)
+				ft_putstr("\n");
+		}
+	}
+	return ;
+}
+
+/*
+** Display the malloc' s allocations by croisante adresse
+*/
+
+void	show_alloc_mem(void)
+{
+	t_zone	*zone;
+
+	zone = base;
+	if (!zone)
+		return ;
+	if (zone->tiny)
+		ft_print_zone(zone->tiny, "TINY : ");
+	if (zone->small)
+		ft_print_zone(zone->small, "SMALL : ");
+	return ;
+}
 
 #include <string.h>
 
@@ -418,14 +491,33 @@ int		main(void)
 	char *s2;
 	size_t m;
 
-	i = 0;
-	while (i < 1024)
-	{
-		s1 = ft_malloc(1024);
-		s1[0] = 42;
-		ft_free(s1);
-		i++;
-	}
+	// i = 0;
+	// while (i < 1024)
+	// {
+	// 	s1 = ft_malloc(1024);
+	// 	s1[0] = 42;
+	// 	ft_free(s1);
+	// 	i++;
+	// }
+	ft_print_adress(1128);
+	printf("\n");
+	ft_print_adress(256);
+	printf("\n");
+	ft_print_adress(921);
+	printf("\n");
+	ft_print_adress(188);
+	printf("\n");
+	ft_print_adress(100);
+	printf("\n");
+	ft_print_adress(590);
+	printf("\n");
+	printf("\n");
+	printf("\n");
 
+	s1 = malloc(12);
+	s1[0] = 42;
+	printf("\nadresse s1%p\n", s1);
+
+	ft_print_adress((size_t)s1);
 	return (0);
 }
