@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/19 14:39:27 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/20 14:55:00 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,18 @@
 
 # define KB 1024
 # define MB 1048576  //1024 * 1024 == 1024 * KB
-/* small_zone == 16 * MB */
-# define min_size_small 993
-# define min_size_large 15360
 
-# define small_zone 16 * MB
+# define MIN_SIZE_SMALL_32 497
+# define MIN_SIZE_SMALL_64 993
+
+# define MIN_SIZE_LARGE_32 7681
+# define MIN_SIZE_LARGE_64 15361
+
+# define SIZE_TINY_ZONE_32 1 * MB
+# define SIZE_TINY_ZONE_64 2 * MB
+
+# define SIZE_SMALL_ZONE_32 8 * MB
+# define SIZE_SMALL_ZONE_64 16 * MB
 
 /*
 ** STRUCT
@@ -136,6 +143,29 @@ t_block	*ft_find_block(void *src, void *ptr)
 	return (b);
 }
 
+t_block	*ft_find_zone_block(void *ptr)
+{
+	t_zone *zone;
+	size_t s;
+
+	zone = base;
+	if (!zone)
+	{
+		return (NULL);
+	}
+	s = sizeof(char *) > 4 ? SIZE_TINY_ZONE_64 : SIZE_TINY_ZONE_32;
+	if ((unsigned char *)ptr >= (unsigned char *)zone->tiny->data && (unsigned char *)ptr <= (unsigned char *)zone->tiny->data + s)
+	{
+		return (zone->tiny);
+	}
+	s = sizeof(char *) > 4 ? SIZE_SMALL_ZONE_64 : SIZE_SMALL_ZONE_32;
+	if ((unsigned char *)ptr >= (unsigned char *)zone->small->data && (unsigned char *)ptr <= (unsigned char *)zone->small->data + s)
+	{
+		return (zone->small);
+	}
+	return (zone->large);
+}
+
 /*
 ** Free the pointeur
 */
@@ -146,11 +176,10 @@ void	ft_free(void *ptr)
 	void *zone;
 
 	//TODO check if correct ptr and from where is wiche zone
-	zone = base;
+	zone = ft_find_zone_block(ptr);
 	b = ft_find_block(zone, ptr);
 	if (b && b->data == ptr)
 	{
-		printf("%s\n", "found");
 		ft_free_block(b);
 	}
 	return;
@@ -204,22 +233,106 @@ t_block	*ft_create_zone(size_t s)
 	return (zone);
 }
 
+/*
+**
+*/
+
+void	ft_init_zone_32()
+{
+	t_zone	*zone;
+
+	zone = mmap(
+		0, 64, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+	if (!zone)
+	{
+		return ;
+	}
+	zone->tiny = ft_create_zone(SIZE_TINY_ZONE_32);
+	zone->small = ft_create_zone(SIZE_SMALL_ZONE_32);
+	zone->large = NULL;
+	base = zone;
+	return ;
+}
+
+void	ft_init_zone_64()
+{
+	t_zone	*zone;
+
+	zone = mmap(
+		0, 64, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+	if (!zone)
+	{
+		return ;
+	}
+	zone->tiny = ft_create_zone(SIZE_TINY_ZONE_64);
+	zone->small = ft_create_zone(SIZE_SMALL_ZONE_64);
+	zone->large = NULL;
+	base = zone;
+	return ;
+}
 
 /*
-** Init a memory zone
+** Init memory zone
 */
 
 void	*ft_init_zone(size_t s)
 {
 	t_block	*b;
 
-	b = ft_create_zone(16 * MB);
-	if (!b)
+	if (sizeof(char *) > 4)
+	{
+		ft_init_zone_64();
+	}
+	else
+	{
+		ft_init_zone_32();
+	}
+	return (ft_malloc(s));
+}
+
+t_block	*ft_find_zone64(size_t s)
+{
+	t_zone *zone;
+
+	if (!base)
 	{
 		return (NULL);
 	}
-	base = b;
-	return (ft_malloc(s));
+	zone = base;
+	if (s < MIN_SIZE_SMALL_64)
+	{
+		return (zone->tiny);
+	}
+	else if (s < MIN_SIZE_LARGE_64)
+	{
+		return (zone->small);
+	}
+	return (zone->large);
+}
+
+t_block	*ft_find_zone32(size_t s)
+{
+	t_zone *zone;
+
+	zone = base;
+	if (s < MIN_SIZE_SMALL_32)
+	{
+		return (zone->tiny);
+	}
+	else if (s < MIN_SIZE_LARGE_32)
+	{
+		return (zone->small);
+	}
+	return (zone->large);
+}
+
+t_block	*ft_find_zone(size_t s)
+{
+	if (sizeof(char *) > 4)
+	{
+		return (ft_find_zone64(s));
+	}
+	return (ft_find_zone32(s));
 }
 
 /*
@@ -230,11 +343,13 @@ void	*ft_malloc(size_t size)
 {
 	t_block	*b;
 	size_t	s;
+	t_block *zone;
 
 	if (base)
 	{
 		s = ft_align(size);
-		b = ft_find_free_block(base, s);
+		zone = ft_find_zone(size);
+		b = ft_find_free_block(zone, s);
 		if (b)
 		{
 			b->is_free = 0;
@@ -265,29 +380,52 @@ void	*ft_realloc(void *ptr, size_t s)
 	t_block *src;
 	t_block *dest;
 	void	*zone;
+	int		i;
 
-	zone = base;
+	if (!ptr)
+	{
+		return (ft_malloc(s));
+	}
+	if (!s)
+	{
+		ft_free(ptr);
+		return (NULL);
+	}
+	// zone = ft_find_zone(s);
+	zone = ft_find_zone_block(ptr);
 	src = ft_find_block(zone, ptr);
-	return;
+	if (!src)
+	{
+		return (ptr);
+	}
+	dest = ft_malloc(s);
+	while (i < s && i < src->size)
+	{
+		dest->data[i] = src->data[i];
+		i++;
+	}
+	return (dest->data);
 }
 
-/*
-** si tu cherches une meuf chaude : 0637708000
-*/
+
+
+#include <string.h>
 
 int		main(void)
 {
 	int i;
-	char *s;
+	char *s1;
+	char *s2;
+	size_t m;
 
 	i = 0;
 	while (i < 1024)
 	{
-		s = ft_malloc(1024);
-		s[0] = 42;
-		// s++;
-		ft_free(s);
+		s1 = ft_malloc(1024);
+		s1[0] = 42;
+		ft_free(s1);
 		i++;
 	}
+
 	return (0);
 }
