@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/21 10:15:55 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/21 15:13:32 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@
 /*
 ** INCLUDE
 */
-
-#include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -37,10 +37,10 @@
 # define MIN_SIZE_LARGE_64 15361
 
 # define SIZE_TINY_ZONE_32 1 * MB
-# define SIZE_TINY_ZONE_64 2 * MB
+# define SIZE_TINY_ZONE_64 2097152//2 * MB
 
 # define SIZE_SMALL_ZONE_32 8 * MB
-# define SIZE_SMALL_ZONE_64 16 * MB
+# define SIZE_SMALL_ZONE_64 2097152 //16 * MB
 
 /*
 ** STRUCT
@@ -82,12 +82,10 @@ void	*ft_malloc(size_t size);
 **  by 8 or 4 (32 or 64 bits systeme)
 */
 
-size_t	ft_align(size_t target)
+long long int	ft_align(long long int target, long long int ref_align)
 {
-	size_t new_size;
-	size_t ref_align;
+	long long int new_size;
 
-	ref_align = sizeof(char *);
 	if (!(target % ref_align))
 	{
 		return (target);
@@ -202,7 +200,6 @@ void	ft_free_large(t_block *b)
 	if (b->next)
 		b->next->prev = b->prev;
 	munmap(b, b->size + sizeof(t_block));
-	printf("%s\n", "free for a large block");
 	return;
 }
 
@@ -272,9 +269,17 @@ t_block	*ft_create_zone(void *addr, size_t s)
 {
 	t_block *zone;
 
-	zone = mmap(
-		addr, s, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-	if (!zone)
+	if (addr)
+	{
+		zone = mmap(
+			addr, s, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+	}
+	else
+	{
+		zone = mmap(
+			addr, s, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+	}
+	if (zone == (void *) - 1)
 		return (NULL);
 	zone->size = s - sizeof(t_block);
 	zone->is_free = 1;
@@ -308,10 +313,11 @@ void	ft_init_zone_32()
 	return ;
 }
 
-void	ft_init_zone_64()
+
+void	ft_init_zone_64_save()
 {
 	t_zone	*zone;
-	void *ptr;
+	char *ptr;
 
 	zone = mmap(
 		0, sizeof(t_zone), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
@@ -319,18 +325,47 @@ void	ft_init_zone_64()
 	{
 		return ;
 	}
-	zone->tiny = ft_create_zone((unsigned char *)zone + sizeof(t_zone), SIZE_TINY_ZONE_64);
+
+	zone->tiny = ft_create_zone((void *)0, SIZE_TINY_ZONE_64);
 	if (!zone->tiny)
 	{
 		return ;
 	}
 	zone->small = ft_create_zone(NULL, SIZE_SMALL_ZONE_64);
-	printf("%s\n", "hello swag");
-	// ptr = zone->tiny->data + zone->tiny->size;
 	zone->large = NULL;
 	base = zone;
 	return ;
 }
+
+
+void	ft_init_zone_64()
+{
+	t_zone	*zone;
+	char *ptr;
+	long long int adr;
+
+
+	zone = mmap(
+		(void *)0x90000, 4096 , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+	if (!zone)
+	{
+		return ;
+	}
+	adr = (long long int)(zone + 4096);
+	zone->tiny = ft_create_zone((void *)adr, SIZE_TINY_ZONE_64);
+	if (!zone->tiny)
+	{
+		return ;
+	}
+	adr = (long long int)(zone + 4096 + SIZE_TINY_ZONE_64);
+	zone->small = ft_create_zone((void *)adr, SIZE_SMALL_ZONE_64);
+
+
+	zone->large = NULL;
+	base = zone;
+	return ;
+}
+
 
 /*
 ** Init memory zone
@@ -445,7 +480,7 @@ void	*ft_malloc(size_t size)
 
 	if (base)
 	{
-		s = ft_align(size);
+		s = ft_align(size, sizeof(char *));
 		if ( (s >= MIN_SIZE_LARGE_64 && sizeof(char *) > 4 ) || (s >= MIN_SIZE_LARGE_32 && sizeof(char *) <= 4 ))
 			return (ft_malloc_large(s));
 		zone = ft_find_zone(size);
@@ -526,7 +561,7 @@ void	ft_print_adress(long double adr)
 
 void	ft_print_zone(t_block *b, char *name_zone)
 {
-	ft_putstr(name_zone); ft_putstr(" ( "); ft_putnbr((size_t)b); ft_putstr(" ) ");
+	ft_putstr(name_zone);
 	ft_putstr("0x");
 	ft_print_adress((size_t)b);
 	ft_putstr("\n");
@@ -578,7 +613,11 @@ int		main(void)
 	char *s3;
 	char *s4;
 	size_t m;
+	struct rlimit r;
 
+	// getrlimit(RLIMIT_AS, &r);
+	// printf("s %lld\n", (long long int)r.rlim_cur);
+	// printf("h %lld\n", (long long int)r.rlim_max);
 	// i = 0;
 	// while (i < 1024)
 	// {
@@ -589,14 +628,14 @@ int		main(void)
 	// }
 
 
-	// s1 = ft_malloc(12);
-	// s1[0]  = 42;
+	s1 = ft_malloc(16);
+	s1[0]  = 42;
 	// s2 = ft_malloc(1200);
 	// s2[0]  = 42;
 	// s3 = ft_malloc(100000);
 	// s3[0]  = 42;
-	s4 = ft_malloc(200000);
-	s4[0]  = 42;
+	// s4 = ft_malloc(200000);
+	// s4[0]  = 42;
 	// printf("%s\n", s3 );
 
 
