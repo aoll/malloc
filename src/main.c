@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/21 15:46:00 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/21 18:31:45 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -442,7 +442,9 @@ void	*ft_malloc_large(size_t s)
 {
 	t_zone *zone;
 	t_block *large;
+	t_block *tmp;
 
+	printf("%s\n", "ft_malloc_large");
 	if (!base)
 		return (NULL);
 	zone = base;
@@ -454,8 +456,13 @@ void	*ft_malloc_large(size_t s)
 	large->is_free = 0;
 	if (zone->large)
 	{
-		zone->large->next = large;
-		large->prev = zone->large;
+		tmp = zone->large;
+		while (tmp && tmp->next)
+		{
+			tmp = tmp->next;
+		}
+		tmp->next = large;
+		large->prev = tmp;
 	}
 	else
 	{
@@ -477,7 +484,8 @@ void	*ft_malloc(size_t size)
 	if (base)
 	{
 		s = ft_align(size, sizeof(char *));
-		if ( (s >= MIN_SIZE_LARGE_64 && sizeof(char *) > 4 ) || (s >= MIN_SIZE_LARGE_32 && sizeof(char *) <= 4 ))
+		if ((s >= MIN_SIZE_LARGE_64 && sizeof(char *) > SIZE_POINTEUR_32)
+		|| (s >= MIN_SIZE_LARGE_32 && sizeof(char *) <= SIZE_POINTEUR_32))
 			return (ft_malloc_large(s));
 		zone = ft_find_zone(size);
 		b = ft_find_free_block(zone, s);
@@ -626,7 +634,7 @@ int		main(void)
 	i = 0;
 	while (i < 1024)
 	{
-		s1 = ft_malloc(16000000);
+		s1 = ft_malloc(16000);
 		s1[0]  = 42;
 		i++;
 	}
