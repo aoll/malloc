@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/21 15:13:32 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/21 15:46:00 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@
 /*
 ** DEFINE
 */
+
+# define SIZE_POINTEUR_32 4
 
 # define KB 1024
 # define MB 1048576  //1024 * 1024 == 1024 * KB
@@ -154,12 +156,12 @@ t_block	*ft_find_zone_block(void *ptr)
 	{
 		return (NULL);
 	}
-	s = sizeof(char *) > 4 ? SIZE_TINY_ZONE_64 : SIZE_TINY_ZONE_32;
+	s = sizeof(char *) > SIZE_POINTEUR_32 ? SIZE_TINY_ZONE_64 : SIZE_TINY_ZONE_32;
 	if ((unsigned char *)ptr >= (unsigned char *)zone->tiny->data && (unsigned char *)ptr <= (unsigned char *)zone->tiny->data + s)
 	{
 		return (zone->tiny);
 	}
-	s = sizeof(char *) > 4 ? SIZE_SMALL_ZONE_64 : SIZE_SMALL_ZONE_32;
+	s = sizeof(char *) > SIZE_POINTEUR_32 ? SIZE_SMALL_ZONE_64 : SIZE_SMALL_ZONE_32;
 	if ((unsigned char *)ptr >= (unsigned char *)zone->small->data && (unsigned char *)ptr <= (unsigned char *)zone->small->data + s)
 	{
 		return (zone->small);
@@ -174,7 +176,7 @@ int	ft_is_in_large_zone(t_block *b)
 
 	if (!b)
 		return (0);
-	s = sizeof(char *) > 4 ? MIN_SIZE_LARGE_64 : MIN_SIZE_LARGE_32;
+	s = sizeof(char *) > SIZE_POINTEUR_32 ? MIN_SIZE_LARGE_64 : MIN_SIZE_LARGE_32;
 	if (b->size >= s)
 	{
 		return (1);
@@ -212,7 +214,6 @@ void	ft_free(void *ptr)
 	t_block *b;
 	void *zone;
 
-	//TODO ?? check if correct ptr and from where is wiche zone
 	zone = ft_find_zone_block(ptr);
 	b = ft_find_block(zone, ptr);
 	if (!b)
@@ -269,16 +270,9 @@ t_block	*ft_create_zone(void *addr, size_t s)
 {
 	t_block *zone;
 
-	if (addr)
-	{
-		zone = mmap(
-			addr, s, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-	}
-	else
-	{
-		zone = mmap(
-			addr, s, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-	}
+
+	zone = mmap(
+		addr, s, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 	if (zone == (void *) - 1)
 		return (NULL);
 	zone->size = s - sizeof(t_block);
@@ -292,7 +286,7 @@ t_block	*ft_create_zone(void *addr, size_t s)
 **
 */
 
-void	ft_init_zone_32()
+void	ft_init_zone_32_save()
 {
 	t_zone	*zone;
 
@@ -313,54 +307,56 @@ void	ft_init_zone_32()
 	return ;
 }
 
-
-void	ft_init_zone_64_save()
+void	ft_init_zone_32()
 {
-	t_zone	*zone;
-	char *ptr;
+	t_zone			*zone;
+	char			*ptr;
+	long long int	adr;
+	int				page_size;
 
+
+	page_size = getpagesize();
 	zone = mmap(
-		0, sizeof(t_zone), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+		(void *)0, page_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 	if (!zone)
 	{
 		return ;
 	}
-
-	zone->tiny = ft_create_zone((void *)0, SIZE_TINY_ZONE_64);
+	adr = (long long int)(zone + page_size);
+	zone->tiny = ft_create_zone((void *)adr, ft_align(SIZE_TINY_ZONE_32,page_size));
 	if (!zone->tiny)
 	{
 		return ;
 	}
-	zone->small = ft_create_zone(NULL, SIZE_SMALL_ZONE_64);
+	adr = (long long int)(zone + page_size + ft_align(SIZE_TINY_ZONE_32, page_size));
+	zone->small = ft_create_zone((void *)adr, ft_align(SIZE_SMALL_ZONE_32,page_size));
 	zone->large = NULL;
 	base = zone;
 	return ;
 }
 
-
 void	ft_init_zone_64()
 {
-	t_zone	*zone;
-	char *ptr;
-	long long int adr;
+	t_zone			*zone;
+	char			*ptr;
+	long long int	adr;
+	int				page_size;
 
-
+	page_size = getpagesize();
 	zone = mmap(
-		(void *)0x90000, 4096 , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+		(void *)0, page_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
 	if (!zone)
 	{
 		return ;
 	}
-	adr = (long long int)(zone + 4096);
-	zone->tiny = ft_create_zone((void *)adr, SIZE_TINY_ZONE_64);
+	adr = (long long int)(zone + page_size);
+	zone->tiny = ft_create_zone((void *)adr, ft_align(SIZE_TINY_ZONE_64, page_size));
 	if (!zone->tiny)
 	{
 		return ;
 	}
-	adr = (long long int)(zone + 4096 + SIZE_TINY_ZONE_64);
-	zone->small = ft_create_zone((void *)adr, SIZE_SMALL_ZONE_64);
-
-
+	adr = (long long int)(zone + page_size + ft_align(SIZE_TINY_ZONE_64, page_size));
+	zone->small = ft_create_zone((void *)adr, ft_align(SIZE_SMALL_ZONE_64, page_size));
 	zone->large = NULL;
 	base = zone;
 	return ;
@@ -375,7 +371,7 @@ void	*ft_init_zone(size_t s)
 {
 	t_block	*b;
 
-	if (sizeof(char *) > 4)
+	if (sizeof(char *) > SIZE_POINTEUR_32)
 	{
 		ft_init_zone_64();
 	}
@@ -430,7 +426,7 @@ t_block	*ft_find_zone32(size_t s)
 
 t_block	*ft_find_zone(size_t s)
 {
-	if (sizeof(char *) > 4)
+	if (sizeof(char *) > SIZE_POINTEUR_32)
 	{
 		return (ft_find_zone64(s));
 	}
@@ -627,9 +623,13 @@ int		main(void)
 	// 	i++;
 	// }
 
-
-	s1 = ft_malloc(16);
-	s1[0]  = 42;
+	i = 0;
+	while (i < 1024)
+	{
+		s1 = ft_malloc(16000000);
+		s1[0]  = 42;
+		i++;
+	}
 	// s2 = ft_malloc(1200);
 	// s2[0]  = 42;
 	// s3 = ft_malloc(100000);
