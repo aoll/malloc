@@ -6,7 +6,7 @@
 #    By: aollivie <aollivie@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2014/11/14 17:07:06 by aollivie          #+#    #+#              #
-#    Updated: 2017/07/24 17:08:39 by alex             ###   ########.fr        #
+#    Updated: 2017/07/24 18:15:17 by alex             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,11 +18,14 @@ ifeq ($(DEBUG), yes)
 				CFLAGS= -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O1 -g #-fsanitize=address -fno-omit-frame-pointer # -g -fsanitize=address,undefined # -g -ansi -pedantic
 else
 		# CFLAGS= -Wall -Wextra -Werror #-O1 -g #-fsanitize=address -fno-omit-frame-pointer
-		CFLAGS=
+		CFLAGS=  -v  -shared -fPIC
 endif
 
+ifeq ($(HOSTTYPE),)
+	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
+endif
 
-NAME =test.exe
+NAME = libft_malloc_$(HOSTTYPE).so
 
 LIBFT =libft/libft.a
 
@@ -34,8 +37,7 @@ O_DIR= obj
 
 MKDIR = mkdir
 
-C_SRC = main.c \
-		free.c \
+C_SRC = free.c \
 		ft_align.c \
 		ft_block.c \
 		ft_create_zone.c \
@@ -46,14 +48,9 @@ C_SRC = main.c \
 		realloc.c \
 		show_alloc_mem.c
 
-
 VPATH= src
 
-
-
 OBJS= $(C_SRC:%.c=$(O_DIR)/%.o)
-
-
 
 .PHONY : all clean fclean re
 
@@ -68,8 +65,8 @@ else
 endif
 
 $(NAME):$(OBJS)
-				$(CC)  $(CFLAGS) $(I_DIR) $^  $(LIBFT) -o $@ $(LIB)
-
+				$(CC) $(CFLAGS) $(I_DIR) $^  $(LIBFT) -o $@ $(LIB)
+				ln -s $(NAME) libft_malloc.so
 
 $(O_DIR)/%.o: %.c
 				$(CC) $(CFLAGS) $(I_DIR) -c $< -o $@
