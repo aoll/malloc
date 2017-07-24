@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:20:33 by alex              #+#    #+#             */
-/*   Updated: 2017/07/24 10:17:13 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/24 11:18:24 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,7 +275,7 @@ t_block	*ft_create_zone(void *addr, size_t s)
 	if ((long long int)r.rlim_max != -1 || (long long int)r.rlim_cur != -1)
 		return (NULL);
 	zone = mmap(
-		addr, s, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+		addr, s, PROT_READ | PROT_WRITE,  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (zone == (void *) - 1)
 		return (NULL);
 	zone->size = s - sizeof(t_block);
@@ -294,7 +294,7 @@ void	ft_init_zone_32_save()
 	t_zone	*zone;
 
 	zone = mmap(
-		0, sizeof(t_zone), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+		0, sizeof(t_zone), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (zone == (void *) - 1)
 		return ;
 	zone->tiny = ft_create_zone(NULL, SIZE_TINY_ZONE_32);
@@ -318,7 +318,7 @@ void	ft_init_zone_32()
 
 	page_size = getpagesize();
 	zone = mmap(
-		(void *)0, page_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+		(void *)0, page_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (zone == (void *) - 1)
 		return ;
 	adr = (long long int)(zone + page_size);
@@ -343,7 +343,7 @@ void	ft_init_zone_64()
 
 	page_size = getpagesize();
 	zone = mmap(
-		(void *)0, page_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+		(void *)0, page_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (zone == (void *) - 1)
 		return ;
 	adr = (long long int)(zone + page_size);
@@ -603,8 +603,8 @@ void	show_alloc_mem(void)
 	return ;
 }
 
-#include <string.h>
 
+/*
 int		main(void)
 {
 	int i;
@@ -648,3 +648,4 @@ int		main(void)
 	// ft_free(s4);
 	return (0);
 }
+*/
