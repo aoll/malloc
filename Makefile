@@ -6,7 +6,7 @@
 #    By: aollivie <aollivie@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2014/11/14 17:07:06 by aollivie          #+#    #+#              #
-#    Updated: 2017/07/24 18:15:17 by alex             ###   ########.fr        #
+#    Updated: 2017/07/25 10:06:43 by alex             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,8 @@ ifeq ($(DEBUG), yes)
 				CFLAGS= -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O1 -g #-fsanitize=address -fno-omit-frame-pointer # -g -fsanitize=address,undefined # -g -ansi -pedantic
 else
 		# CFLAGS= -Wall -Wextra -Werror #-O1 -g #-fsanitize=address -fno-omit-frame-pointer
-		CFLAGS=  -v  -shared -fPIC
+		# CFLAGS= -shared -fPIC -Wall -Wextra -Werror
+		CFLAGS=  -Wall -Wextra -Werror -fPIC
 endif
 
 ifeq ($(HOSTTYPE),)
@@ -65,7 +66,7 @@ else
 endif
 
 $(NAME):$(OBJS)
-				$(CC) $(CFLAGS) $(I_DIR) $^  $(LIBFT) -o $@ $(LIB)
+				$(CC) $(CFLAGS) $(I_DIR) $^  $(LIBFT) -shared -o $@ $(LIB)
 				ln -s $(NAME) libft_malloc.so
 
 $(O_DIR)/%.o: %.c

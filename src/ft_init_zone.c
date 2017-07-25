@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:20:58 by alex              #+#    #+#             */
-/*   Updated: 2017/07/24 15:50:24 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/25 09:34:24 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,6 @@ static void		ft_init_zone_64(void)
 
 void		*ft_init_zone(size_t s)
 {
-	t_block	*b;
-
 	if (sizeof(char *) > SIZE_POINTEUR_32)
 	{
 		ft_init_zone_64();

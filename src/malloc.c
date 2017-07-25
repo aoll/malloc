@@ -6,17 +6,42 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:07:51 by alex              #+#    #+#             */
-/*   Updated: 2017/07/24 16:42:48 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/25 09:31:48 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "malloc.h"
 
+static long long int	ft_find_adresse(void)
+{
+	t_zone	*zone;
+	t_block	*tmp;
+
+	if (!base)
+		return (0);
+	zone = base;
+	if (zone->large)
+	{
+		tmp = zone->large;
+		while (tmp && tmp->next)
+			tmp = tmp->next;
+		return ((long long int)(tmp->data + tmp->size));
+	}
+	if (zone->small)
+	{
+		tmp = zone->small;
+		while (tmp && tmp->next)
+			tmp = tmp->next;
+		return ((long long int)(tmp->data + tmp->size));
+	}
+	return (0);
+}
+
 /*
 ** Alloue memory space for a large zone
 */
 
-static void		*ft_malloc_large(size_t s)
+static void				*ft_malloc_large(size_t s)
 {
 	t_zone *zone;
 	t_block *large;
@@ -25,7 +50,8 @@ static void		*ft_malloc_large(size_t s)
 	if (!base)
 		return (NULL);
 	zone = base;
-	large = ft_create_zone(NULL, s + sizeof(t_block));
+	large = ft_create_zone((void *)ft_find_adresse(),
+	ft_align(s + sizeof(t_block), getpagesize()));
 	if (!large)
 		return (NULL);
 	large->is_free = 0;
@@ -46,7 +72,7 @@ static void		*ft_malloc_large(size_t s)
 ** Split the block in parameter and add new meta-data for the new block
 */
 
-static void		ft_split_block(t_block *b, size_t s)
+static void				ft_split_block(t_block *b, size_t s)
 {
 	t_block	*new;
 
@@ -64,7 +90,7 @@ static void		ft_split_block(t_block *b, size_t s)
 ** else return null
 */
 
-static t_block	*ft_find_free_block(t_block *first, size_t size)
+static t_block			*ft_find_free_block(t_block *first, size_t size)
 {
 	t_block *b;
 
@@ -80,7 +106,7 @@ static t_block	*ft_find_free_block(t_block *first, size_t size)
 ** A fit malloc with only small zone, dev time
 */
 
-void			*ft_malloc(size_t size)
+void					*ft_malloc(size_t size)
 {
 	t_block	*b;
 	size_t	s;
