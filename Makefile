@@ -6,7 +6,7 @@
 #    By: aollivie <aollivie@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2014/11/14 17:07:06 by aollivie          #+#    #+#              #
-#    Updated: 2017/07/25 13:16:24 by alex             ###   ########.fr        #
+#    Updated: 2017/07/25 16:54:21 by alex             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -81,7 +81,7 @@ clean :
 		make clean -C libft
 
 fclean : clean
-		@rm -rf $(NAME)
+		@rm -rf $(NAME) libft_malloc.so
 		make fclean -C libft
 
 re : fclean all

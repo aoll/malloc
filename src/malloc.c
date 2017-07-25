@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:07:51 by alex              #+#    #+#             */
-/*   Updated: 2017/07/25 16:44:51 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/25 16:49:24 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,14 +25,16 @@ static long long int	ft_find_adresse(void)
 		tmp = zone->large;
 		while (tmp && tmp->next)
 			tmp = tmp->next;
-		return ((long long int)(tmp->data + tmp->size));
+		return ((
+			ft_align((long long int)tmp->data + tmp->size, getpagesize())));
 	}
 	if (zone->small)
 	{
 		tmp = zone->small;
 		while (tmp && tmp->next)
 			tmp = tmp->next;
-		return ((long long int)(tmp->data) + tmp->size);
+		return ((
+			ft_align((long long int)tmp->data + tmp->size, getpagesize())));
 	}
 	return (0);
 }
