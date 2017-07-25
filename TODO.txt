@@ -1,0 +1,4 @@
+show_alloc_mem doit afficher par odre croissante et pour cela elle doivent etre creer de la sorte(c'est fait pour tiny et small doit etre fait pour large
+gcc -L. -Wl,-R /home/alex/c/malloc/malloc test5.c -lft_malloc (test show_alloc_mem)
+export LD_PRELOAD=/home/alex/c/malloc/malloc/lift_malloc.so
+gcc -L. -Wl,-R /home/alex/c/malloc/malloc test5.c -lft_malloc (test show_alloc_mem)

@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:07:51 by alex              #+#    #+#             */
-/*   Updated: 2017/07/25 09:31:48 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/25 16:44:51 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static long long int	ft_find_adresse(void)
 		tmp = zone->small;
 		while (tmp && tmp->next)
 			tmp = tmp->next;
-		return ((long long int)(tmp->data + tmp->size));
+		return ((long long int)(tmp->data) + tmp->size);
 	}
 	return (0);
 }
@@ -41,7 +41,7 @@ static long long int	ft_find_adresse(void)
 ** Alloue memory space for a large zone
 */
 
-static void				*ft_malloc_large(size_t s)
+static void				*malloc_large(size_t s)
 {
 	t_zone *zone;
 	t_block *large;
@@ -106,7 +106,7 @@ static t_block			*ft_find_free_block(t_block *first, size_t size)
 ** A fit malloc with only small zone, dev time
 */
 
-void					*ft_malloc(size_t size)
+void					*malloc(size_t size)
 {
 	t_block	*b;
 	size_t	s;
@@ -116,7 +116,7 @@ void					*ft_malloc(size_t size)
 		s = ft_align(size, sizeof(char *));
 		if ((s >= MIN_SIZE_LARGE_64 && sizeof(char *) > SIZE_POINTEUR_32)
 		|| (s >= MIN_SIZE_LARGE_32 && sizeof(char *) <= SIZE_POINTEUR_32))
-			return (ft_malloc_large(s));
+			return (malloc_large(s));
 		b = ft_find_free_block(ft_find_zone(size), s);
 		if (b)
 		{

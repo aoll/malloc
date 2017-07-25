@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 14:24:37 by alex              #+#    #+#             */
-/*   Updated: 2017/07/24 17:10:20 by alex             ###   ########.fr       */
+/*   Updated: 2017/07/25 16:16:27 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static void		ft_free_large(t_block *b)
 	if (b->next)
 		b->next->prev = b->prev;
 	munmap(b, b->size + sizeof(t_block));
-	return;
+	return ;
 }
 
 static int		ft_is_in_large_zone(t_block *b)
@@ -59,7 +59,7 @@ static void		ft_fusion_block(t_block *b)
 			b->next->prev = b;
 		}
 	}
-	return;
+	return ;
 }
 
 /*
@@ -75,7 +75,7 @@ static void		ft_free_block(t_block *b)
 	{
 		ft_fusion_block(b->prev);
 	}
-	return;
+	return ;
 }
 
 
@@ -83,25 +83,25 @@ static void		ft_free_block(t_block *b)
 ** Free the pointeur
 */
 
-void			ft_free(void *ptr)
+void			free(void *ptr)
 {
 	t_block *b;
 	void *zone;
 
+	if (!base)
+		return ;
+	if (!ptr)
+		return ;
 	zone = ft_find_zone_block(ptr);
 	b = ft_find_block(zone, ptr);
 	if (!b)
-	{
 		return ;
-	}
 	if (ft_is_in_large_zone(b))
 	{
 		ft_free_large(b);
 		return ;
 	}
 	if (b && b->data == ptr && !b->is_free)
-	{
 		ft_free_block(b);
-	}
-	return;
+	return ;
 }

@@ -31,30 +31,30 @@ int		main(void)
 	// i = 0;
 	// while (i < 1024)
 	// {
-	// 	s1 = ft_malloc(1024);
+	// 	s1 = malloc(1024);
 	// 	s1[0] = 42;
-	// 	ft_free(s1);
+	// 	free(s1);
 	// 	i++;
 	// }
 
 	i = 0;
 	while (i < 1024)
 	{
-		s1 = ft_malloc(16000);
+		s1 = malloc(16000);
 		s1[0]  = 42;
 		i++;
 	}
-	// s2 = ft_malloc(1200);
+	// s2 = malloc(1200);
 	// s2[0]  = 42;
-	// s3 = ft_malloc(100000);
+	// s3 = malloc(100000);
 	// s3[0]  = 42;
-	// s4 = ft_malloc(200000);
+	// s4 = malloc(200000);
 	// s4[0]  = 42;
 	// printf("%s\n", s3 );
 
 
 	show_alloc_mem();
 
-	// ft_free(s4);
+	// free(s4);
 	return (0);
 }

@@ -79,5 +79,5 @@ void		*ft_init_zone(size_t s)
 	}
 	if (!base)
 		return (NULL);
-	return (ft_malloc(s));
+	return (malloc(s));
 }
