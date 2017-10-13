@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/17 15:07:28 by alex              #+#    #+#             */
-/*   Updated: 2017/07/24 17:29:32 by alex             ###   ########.fr       */
+/*   Updated: 2017/10/13 10:34:46 by aollivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,10 @@
 ** INCLUDE
 */
 
-#include "libft.h"
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/mman.h>
-// #include <unistd.h>
+# include "libft.h"
+# include <sys/time.h>
+# include <sys/resource.h>
+# include <sys/mman.h>
 
 /*
 ** DEFINE
@@ -30,7 +29,7 @@
 # define SIZE_POINTEUR_32 4
 
 # define KB 1024
-# define MB 1048576  //1024 * 1024 == 1024 * KB
+# define MB 1048576
 
 # define MIN_SIZE_SMALL_32 497
 # define MIN_SIZE_SMALL_64 993
@@ -42,15 +41,15 @@
 # define SIZE_TINY_ZONE_64 2097152
 
 # define SIZE_SMALL_ZONE_32 8 * MB
-# define SIZE_SMALL_ZONE_64 16777216 //16 * MB
+# define SIZE_SMALL_ZONE_64 16777216
 
 /*
 ** STRUCT
 */
 
-typedef struct s_block t_block;
+typedef struct s_block	t_block;
 
-struct s_block
+struct			s_block
 {
 	size_t		size;
 	t_block		*next;
@@ -59,19 +58,20 @@ struct s_block
 	char		data[1];
 };
 
-typedef struct s_zone t_zone;
+typedef struct s_zone	t_zone;
 
-struct s_zone
+struct			s_zone
 {
-	t_block *tiny;
-	t_block *small;
-	t_block *large;
+	t_block		*tiny;
+	t_block		*small;
+	t_block		*large;
 };
+
 /*
 ** GLOBAL
 */
 
-void *base;
+void *g_base;
 
 /*
 ** PROTOTYPES
@@ -87,8 +87,5 @@ t_block			*ft_find_zone(size_t s);
 t_block			*ft_find_zone_block(void *ptr);
 t_block			*ft_create_zone(void *addr, size_t s);
 t_block			*ft_find_block(void *src, void *ptr);
-
-
-
 
 #endif

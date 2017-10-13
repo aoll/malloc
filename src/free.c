@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 14:24:37 by alex              #+#    #+#             */
-/*   Updated: 2017/07/25 16:16:27 by alex             ###   ########.fr       */
+/*   Updated: 2017/10/13 10:39:01 by aollivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ static void		ft_free_large(t_block *b)
 {
 	t_zone *zone;
 
-	zone = base;
-	if (!base)
+	zone = g_base;
+	if (!g_base)
 		return ;
 	if (b->prev)
 		b->prev->next = b->next;
@@ -78,17 +78,16 @@ static void		ft_free_block(t_block *b)
 	return ;
 }
 
-
 /*
 ** Free the pointeur
 */
 
 void			free(void *ptr)
 {
-	t_block *b;
-	void *zone;
+	t_block		*b;
+	void		*zone;
 
-	if (!base)
+	if (!g_base)
 		return ;
 	if (!ptr)
 		return ;

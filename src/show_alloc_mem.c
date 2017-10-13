@@ -77,7 +77,7 @@ void					show_alloc_mem(void)
 	t_zone			*zone;
 	long long int	total_size;
 
-	zone = base;
+	zone = g_base;
 	total_size = 0;
 	if (!zone)
 		return ;

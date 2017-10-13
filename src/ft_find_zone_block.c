@@ -6,19 +6,18 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 16:36:24 by alex              #+#    #+#             */
-/*   Updated: 2017/07/24 16:37:53 by alex             ###   ########.fr       */
+/*   Updated: 2017/10/13 10:37:55 by aollivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "malloc.h"
-
 
 t_block	*ft_find_zone_block(void *ptr)
 {
 	t_zone *zone;
 	size_t s;
 
-	zone = base;
+	zone = g_base;
 	if (!zone)
 		return (NULL);
 	s = sizeof(char *) > SIZE_POINTEUR_32 ?

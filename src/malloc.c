@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:07:51 by alex              #+#    #+#             */
-/*   Updated: 2017/07/25 16:49:24 by alex             ###   ########.fr       */
+/*   Updated: 2017/10/13 15:27:42 by aollivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ static long long int	ft_find_adresse(void)
 	t_zone	*zone;
 	t_block	*tmp;
 
-	if (!base)
+	if (!g_base)
 		return (0);
-	zone = base;
+	zone = g_base;
 	if (zone->large)
 	{
 		tmp = zone->large;
@@ -45,13 +45,13 @@ static long long int	ft_find_adresse(void)
 
 static void				*malloc_large(size_t s)
 {
-	t_zone *zone;
-	t_block *large;
-	t_block *tmp;
+	t_zone	*zone;
+	t_block	*large;
+	t_block	*tmp;
 
-	if (!base)
+	if (!g_base)
 		return (NULL);
-	zone = base;
+	zone = g_base;
 	large = ft_create_zone((void *)ft_find_adresse(),
 	ft_align(s + sizeof(t_block), getpagesize()));
 	if (!large)
@@ -113,7 +113,7 @@ void					*malloc(size_t size)
 	t_block	*b;
 	size_t	s;
 
-	if (base)
+	if (g_base)
 	{
 		s = ft_align(size, sizeof(char *));
 		if ((s >= MIN_SIZE_LARGE_64 && sizeof(char *) > SIZE_POINTEUR_32)

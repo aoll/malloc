@@ -16,11 +16,11 @@ static t_block	*ft_find_zone64(size_t s)
 {
 	t_zone *zone;
 
-	if (!base)
+	if (!g_base)
 	{
 		return (NULL);
 	}
-	zone = base;
+	zone = g_base;
 	if (s < MIN_SIZE_SMALL_64)
 	{
 		return (zone->tiny);
@@ -36,8 +36,8 @@ static t_block	*ft_find_zone32(size_t s)
 {
 	t_zone *zone;
 
-	zone = base;
-	if (!base)
+	zone = g_base;
+	if (!g_base)
 	{
 		return (NULL);
 	}
