@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:06:11 by alex              #+#    #+#             */
-/*   Updated: 2017/10/13 10:44:31 by aollivie         ###   ########.fr       */
+/*   Updated: 2017/10/13 15:32:18 by aollivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 static int	is_g_base(void *ptr, size_t s)
 {
 	if (!g_base)
-		return (EXIT_FAILLURE);
+		return (EXIT_FAILURE);
 	if (!s)
 	{
 		free(ptr);
-		return (EXIT_FAILLURE);
+		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
 }
