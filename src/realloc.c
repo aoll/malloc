@@ -6,7 +6,7 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/07/24 15:06:11 by alex              #+#    #+#             */
-/*   Updated: 2017/10/13 15:32:18 by aollivie         ###   ########.fr       */
+/*   Updated: 2017/10/19 15:43:53 by aollivie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,5 @@ void		*realloc(void *ptr, size_t s)
 		dest->data[i] = src->data[i];
 		i++;
 	}
-	free(ptr);
 	return (dest->data);
 }
